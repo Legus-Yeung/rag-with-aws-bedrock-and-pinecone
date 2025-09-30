@@ -4,16 +4,17 @@ A Retrieval-Augmented Generation (RAG) system built with AWS Bedrock, Pinecone v
 
 ## Result
 
-Converting word document about Legus to vector using all-MiniLM-L6-v2 embedding model and uploading to pinecone.
+(1) Converting word document about Legus to vector using all-MiniLM-L6-v2 embedding model and uploading to pinecone
 
 <img width="770" height="224" alt="Screenshot 2025-09-30 113651" src="https://github.com/user-attachments/assets/5ee7f68f-b133-4335-b43e-060fcf650699" />
-Asking AWS Bedrock hosted Qwen model a question without RAG (as expected, it wouldn't be able to answer with the tool and access to knowledge base).
+
+(2) Asking AWS Bedrock hosted Qwen model a question without RAG (as expected, it wouldn't be able to answer with the tool and access to knowledge base)
 
 <img width="1021" height="189" alt="Screenshot 2025-09-30 113728" src="https://github.com/user-attachments/assets/d5de0f60-2a50-477c-bc10-ef60dcaedf5c" />
-Asking AWS Bedrock hosted Qwen the same question and it successfully answered with RAG.
+
+(3) Asking AWS Bedrock hosted Qwen the same question and it successfully answered with RAG.
 
 <img width="1225" height="585" alt="Screenshot 2025-09-30 114019" src="https://github.com/user-attachments/assets/6c5658a6-b97a-4bcb-b1e2-c997d8c9b879" />
-
 
 ## 🚀 Features
 
