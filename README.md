@@ -2,7 +2,7 @@
 
 A Retrieval-Augmented Generation (RAG) system built with AWS Bedrock, Pinecone vector database, and Qwen language models. This project demonstrates how to create a knowledge base and use function calling to enhance AI responses with relevant context.
 
-## Result
+## 📝 Result
 
 (1) Converting word document about Legus to vector using all-MiniLM-L6-v2 embedding model and uploading to pinecone
 
