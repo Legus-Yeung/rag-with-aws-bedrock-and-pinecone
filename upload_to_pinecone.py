@@ -171,4 +171,3 @@ if __name__ == "__main__":
     print(f"Using embedding model: all-MiniLM-L6-v2")
     print(f"Index: nimonik-rag")
     upload_documents(sample_documents)
-    print("\nUpload complete!")
