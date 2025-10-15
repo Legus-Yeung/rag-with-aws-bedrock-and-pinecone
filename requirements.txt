@@ -1,0 +1,5 @@
+boto3
+python-dotenv
+pinecone
+sentence-transformers
+pymilvus>=2.3.0
