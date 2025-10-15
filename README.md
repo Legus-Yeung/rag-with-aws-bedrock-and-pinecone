@@ -1,6 +1,6 @@
-# RAG with AWS Bedrock and Pinecone
+# RAG with AWS Bedrock and Milvus
 
-A Retrieval-Augmented Generation (RAG) system built with AWS Bedrock, Pinecone vector database, and Qwen language models. This project demonstrates how to create a knowledge base and use function calling to enhance AI responses with relevant context.
+A Retrieval-Augmented Generation (RAG) system built with AWS Bedrock, self-hosted Milvus vector database, and Qwen language models. This project demonstrates how to create a knowledge base and use function calling to enhance AI responses with relevant context. Originally built with Pinecone, now migrated to self-hosted Milvus for cost savings and full data control.
 
 ## 📝 Result
 
@@ -18,28 +18,35 @@ A Retrieval-Augmented Generation (RAG) system built with AWS Bedrock, Pinecone v
 
 ## 🚀 Features
 
-- **Vector Database Integration**: Uses Pinecone for efficient similarity search
+- **Self-Hosted Vector Database**: Uses Milvus for efficient similarity search with full data control
+- **Docker Integration**: Easy setup with Docker Compose for Milvus services
 - **Function Calling**: Leverages Qwen model's function calling capabilities for intelligent RAG
 - **AWS Bedrock Integration**: Utilizes AWS Bedrock for LLM inference
 - **Smart Document Chunking**: Intelligent text chunking with overlap for better context
 - **Command Line Interface**: Easy-to-use CLI for both simple chat and RAG queries
+- **Migration Tools**: Complete migration scripts from Pinecone to Milvus
 
 ## 📁 Project Structure
 
 ```
 rag-with-aws-bedrock-and-pinecone/
-├── aws-chat.py          # Simple chat interface with Qwen model
-├── aws-chat-rag.py      # RAG system with function calling
-├── upload_to_pinecone.py # Document upload and vectorization
-├── README.md            # This file
-└── venv/                # Python virtual environment
+├── aws-chat.py              # Simple chat interface with Qwen model
+├── aws-chat-rag.py          # Original RAG system with Pinecone
+├── aws-chat-rag-milvus.py   # New RAG system with Milvus
+├── upload_to_pinecone.py    # Document upload and vectorization
+├── export_pinecone_data.py  # Export data from Pinecone
+├── migrate_to_milvus.py     # Migration script to Milvus
+├── docker-compose.yml       # Milvus Docker setup
+├── MIGRATION_SUMMARY.md     # Migration documentation
+├── README.md                # This file
+└── venv/                    # Python virtual environment
 ```
 
 ## 🛠️ Prerequisites
 
 - Python 3.11+
 - AWS Account with Bedrock access
-- Pinecone account and API key
+- Docker and Docker Compose installed
 - Required Python packages (see installation below)
 
 ## 📦 Installation
@@ -63,7 +70,7 @@ rag-with-aws-bedrock-and-pinecone/
 
 3. **Install dependencies**
    ```bash
-   pip install boto3 python-dotenv pinecone-client sentence-transformers
+   pip install boto3 python-dotenv pinecone sentence-transformers pymilvus
    ```
 
 4. **Set up environment variables**
@@ -75,39 +82,73 @@ rag-with-aws-bedrock-and-pinecone/
    AWS_DEFAULT_REGION=us-east-1
    ```
 
+5. **Start Milvus services**
+   ```bash
+   docker-compose up -d
+   ```
+
 ## 🚀 Quick Start
 
-### 1. Upload Documents to Pinecone
+### Option A: Using Milvus (Recommended)
 
-First, upload sample documents to create your knowledge base:
+1. **Start Milvus services**
+   ```bash
+   docker-compose up -d
+   ```
 
-```bash
-python upload_to_pinecone.py
-```
+2. **Upload documents to Pinecone (for migration)**
+   ```bash
+   python upload_to_pinecone.py
+   ```
 
-This will upload sample documents about "Legus" to your Pinecone index named "nimonik-rag".
+3. **Export data from Pinecone**
+   ```bash
+   python export_pinecone_data.py
+   ```
 
-### 2. Simple Chat (No RAG)
+4. **Migrate to Milvus**
+   ```bash
+   python migrate_to_milvus.py
+   ```
 
-For basic chat without retrieval:
+5. **Use RAG with Milvus**
+   ```bash
+   python aws-chat-rag-milvus.py "What are Legus's favorite foods?"
+   ```
 
-```bash
-python aws-chat.py "What is artificial intelligence?"
-```
+### Option B: Using Original Pinecone Setup
 
-### 3. RAG with Function Calling
+1. **Upload Documents to Pinecone**
 
-For intelligent retrieval-augmented responses:
+   First, upload sample documents to create your knowledge base:
 
-```bash
-python aws-chat-rag.py "What are Legus's favorite foods?"
-```
+   ```bash
+   python upload_to_pinecone.py
+   ```
 
-The system will:
-1. Check if the AI knows the answer
-2. If not, automatically call the search function
-3. Retrieve relevant documents from Pinecone
-4. Provide an enhanced answer with context
+   This will upload sample documents about "Legus" to your Pinecone index named "nimonik-rag".
+
+2. **Simple Chat (No RAG)**
+
+   For basic chat without retrieval:
+
+   ```bash
+   python aws-chat.py "What is artificial intelligence?"
+   ```
+
+3. **RAG with Function Calling**
+
+   For intelligent retrieval-augmented responses:
+
+   ```bash
+   python aws-chat-rag.py "What are Legus's favorite foods?"
+   ```
+
+   The system will:
+   1. Check if the AI knows the answer
+   2. If not, automatically call the search function
+   3. Retrieve relevant documents from Pinecone
+   4. Provide an enhanced answer with context
 
 ## 🔧 Configuration
 
@@ -120,6 +161,15 @@ The system uses the Qwen 3 Coder 30B model on AWS Bedrock:
 
 ### Vector Database Configuration
 
+**Milvus (Recommended):**
+- **Embedding Model**: `all-MiniLM-L6-v2`
+- **Chunk Size**: 1000 characters
+- **Overlap**: 200 characters
+- **Collection Name**: `nimonik_rag`
+- **Host**: `localhost:19530`
+- **Metric**: Cosine similarity
+
+**Pinecone (Legacy):**
 - **Embedding Model**: `all-MiniLM-L6-v2`
 - **Chunk Size**: 1000 characters
 - **Overlap**: 200 characters
@@ -132,7 +182,7 @@ The system uses the Qwen 3 Coder 30B model on AWS Bedrock:
 1. **User Query**: User asks a question via command line
 2. **Initial Assessment**: AI evaluates if it knows the answer
 3. **Function Calling**: If needed, AI calls `search_knowledge_base` function
-4. **Vector Search**: System searches Pinecone for relevant documents
+4. **Vector Search**: System searches Milvus/Pinecone for relevant documents
 5. **Context Integration**: Retrieved context is sent back to AI
 6. **Final Response**: AI provides answer with retrieved context
 
@@ -140,7 +190,7 @@ The system uses the Qwen 3 Coder 30B model on AWS Bedrock:
 
 1. **Text Chunking**: Documents are split into overlapping chunks
 2. **Embedding Generation**: Each chunk is converted to vector embeddings
-3. **Vector Storage**: Embeddings stored in Pinecone with metadata
+3. **Vector Storage**: Embeddings stored in Milvus/Pinecone with metadata
 4. **Similarity Search**: Queries are embedded and matched against stored vectors
 
 ## 🎯 Function Calling Implementation
@@ -205,18 +255,25 @@ python aws-chat.py "What programming languages does Legus know?"
 python aws-chat.py "Where has Legus traveled?"
 python aws-chat.py "What are Legus's career goals?"
 
-# RAG queries (with function calling)
+# RAG queries with Milvus (recommended)
+python aws-chat-rag-milvus.py "What are Legus's favorite outdoor activities?"
+python aws-chat-rag-milvus.py "What programming languages does Legus know?"
+python aws-chat-rag-milvus.py "Where has Legus traveled?"
+python aws-chat-rag-milvus.py "What are Legus's career goals?"
+
+# RAG queries with Pinecone (legacy)
 python aws-chat-rag.py "What are Legus's favorite outdoor activities?"
 python aws-chat-rag.py "What programming languages does Legus know?"
 python aws-chat-rag.py "Where has Legus traveled?"
 python aws-chat-rag.py "What are Legus's career goals?"
 
-# General knowledge questions (both should work similarly)
+# General knowledge questions (all versions should work similarly)
 python aws-chat.py "Explain machine learning"
+python aws-chat-rag-milvus.py "Explain machine learning"
 python aws-chat-rag.py "Explain machine learning"
 ```
 
-**Note**: The RAG version will provide more detailed, context-specific answers for questions about Legus, while the simple chat version will give general responses or say "I don't know" for specific personal information.
+**Note**: The RAG versions will provide more detailed, context-specific answers for questions about Legus, while the simple chat version will give general responses or say "I don't know" for specific personal information.
 
 ## 🐛 Troubleshooting
 
@@ -226,16 +283,21 @@ python aws-chat-rag.py "Explain machine learning"
    - Ensure AWS credentials are properly configured
    - Check that Bedrock is available in your region
 
-2. **Pinecone Connection Error**
+2. **Milvus Connection Error**
+   - Ensure Docker is running and Milvus services are started: `docker-compose up -d`
+   - Check if Milvus is accessible at `localhost:19530`
+   - Verify collection exists: `python migrate_to_milvus.py`
+
+3. **Pinecone Connection Error** (Legacy)
    - Verify your Pinecone API key
    - Ensure the index "nimonik-rag" exists
 
-3. **Model Not Found**
+4. **Model Not Found**
    - Check if Qwen model is available in your AWS region
    - Verify model ID is correct
 
-4. **Import Errors**
-   - Ensure all dependencies are installed
+5. **Import Errors**
+   - Ensure all dependencies are installed: `pip install boto3 python-dotenv pinecone sentence-transformers pymilvus`
    - Activate the virtual environment
 
 ### Debug Mode
@@ -262,17 +324,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Acknowledgments
 
 - [AWS Bedrock](https://aws.amazon.com/bedrock/) for LLM hosting
-- [Pinecone](https://www.pinecone.io/) for vector database
+- [Milvus](https://milvus.io/) for self-hosted vector database
+- [Pinecone](https://www.pinecone.io/) for original vector database inspiration
 - [Qwen](https://qwen.readthedocs.io/) for the language model
 - [Sentence Transformers](https://www.sbert.net/) for embeddings
 
-## 📞 Support
-
-For questions or issues:
-1. Check the troubleshooting section
-2. Review AWS Bedrock and Pinecone documentation
-3. Open an issue in this repository
-
----
-
-**Happy RAG-ing! 🎉**
+**Happy RAG-ing with Milvus! 🎉**
